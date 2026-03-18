@@ -321,6 +321,104 @@ function DashboardPreview() {
   );
 }
 
+// Animated SMS conversation
+const smsMessages = [
+  { dir: "in" as const, text: "Hey what's good for Saturday night? Group of 6" },
+  { dir: "out" as const, text: "Saturday's stacked! Omnia has Fisher, Hakkasan has Tiesto. For a group of 6, I'd hit Omnia — vibes are crazy for that size group. Want me to get you on the list?" },
+  { dir: "in" as const, text: "Yeah Omnia for sure, 4 guys 2 girls" },
+  { dir: "out" as const, text: "Got you! What's the name for the list?" },
+  { dir: "in" as const, text: "Marcus Johnson" },
+  { dir: "out" as const, text: "You're on the list! Marcus Johnson +5 at Omnia Saturday. Guest list is open 10:30PM - 12:30AM. See you there!" },
+];
+
+function SMSDemo() {
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [typing, setTyping] = useState(false);
+  const [started, setStarted] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const chatRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting && !started) setStarted(true); },
+      { threshold: 0.3 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (!started || visibleCount >= smsMessages.length) return;
+
+    const nextMsg = smsMessages[visibleCount];
+    // Show typing indicator before bot replies
+    const typingDelay = nextMsg.dir === "out" ? 1200 : 0;
+    const msgDelay = nextMsg.dir === "out" ? 800 : 600;
+
+    if (nextMsg.dir === "out") {
+      const typingTimer = setTimeout(() => setTyping(true), visibleCount === 0 ? 800 : 400);
+      const msgTimer = setTimeout(() => {
+        setTyping(false);
+        setVisibleCount((c) => c + 1);
+      }, typingDelay + msgDelay);
+      return () => { clearTimeout(typingTimer); clearTimeout(msgTimer); };
+    } else {
+      const timer = setTimeout(() => setVisibleCount((c) => c + 1), visibleCount === 0 ? 600 : msgDelay + 400);
+      return () => clearTimeout(timer);
+    }
+  }, [started, visibleCount]);
+
+  // Auto-scroll chat
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [visibleCount, typing]);
+
+  // Restart loop
+  useEffect(() => {
+    if (visibleCount >= smsMessages.length) {
+      const timer = setTimeout(() => {
+        setVisibleCount(0);
+        setStarted(true);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [visibleCount]);
+
+  return (
+    <div ref={ref} className="flex justify-center">
+      <div className="w-full max-w-[320px] rounded-[2rem] border-2 border-border/50 bg-card p-3 shadow-2xl sm:p-4">
+        <div className="mb-3 flex items-center justify-center">
+          <div className="h-6 w-24 rounded-full bg-background" />
+        </div>
+        <div ref={chatRef} className="h-[380px] space-y-3 overflow-y-auto rounded-2xl bg-background p-3 sm:p-4">
+          {smsMessages.slice(0, visibleCount).map((msg, i) => (
+            <div key={i} className={`flex ${msg.dir === "in" ? "justify-start" : "justify-end"} animate-msg-appear`}>
+              <div className={`max-w-[220px] rounded-2xl px-4 py-2.5 text-sm ${
+                msg.dir === "in"
+                  ? "rounded-bl-sm bg-secondary"
+                  : "bg-gradient-velvet rounded-br-sm text-white"
+              }`}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          {typing && (
+            <div className="flex justify-end animate-msg-appear">
+              <div className="bg-gradient-velvet flex gap-1 rounded-2xl rounded-br-sm px-4 py-3">
+                <div className="h-2 w-2 rounded-full bg-white/70 typing-dot-1" />
+                <div className="h-2 w-2 rounded-full bg-white/70 typing-dot-2" />
+                <div className="h-2 w-2 rounded-full bg-white/70 typing-dot-3" />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // FAQ Accordion
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
@@ -641,21 +739,7 @@ export default function Home() {
                 <li className="flex items-center gap-2"><CheckCircle2 className="h-5 w-5 text-velvet-light" />Submits to venue guest list system instantly</li>
               </ul>
             </div>
-            <div className="flex justify-center">
-              <div className="w-full max-w-[320px] rounded-[2rem] border-2 border-border/50 bg-card p-3 shadow-2xl sm:p-4">
-                <div className="mb-4 flex items-center justify-center">
-                  <div className="h-6 w-24 rounded-full bg-background" />
-                </div>
-                <div className="space-y-3 rounded-2xl bg-background p-4">
-                  <div className="flex justify-start"><div className="max-w-[220px] rounded-2xl rounded-bl-sm bg-secondary px-4 py-2.5 text-sm">Hey what&apos;s good for Saturday night? Group of 6</div></div>
-                  <div className="flex justify-end"><div className="bg-gradient-velvet max-w-[220px] rounded-2xl rounded-br-sm px-4 py-2.5 text-sm text-white">Saturday&apos;s stacked! Omnia has Fisher, Hakkasan has Tiesto. For a group of 6, I&apos;d hit Omnia — vibes are crazy for that size group. Want me to get you on the list?</div></div>
-                  <div className="flex justify-start"><div className="max-w-[220px] rounded-2xl rounded-bl-sm bg-secondary px-4 py-2.5 text-sm">Yeah Omnia for sure, 4 guys 2 girls</div></div>
-                  <div className="flex justify-end"><div className="bg-gradient-velvet max-w-[220px] rounded-2xl rounded-br-sm px-4 py-2.5 text-sm text-white">Got you! What&apos;s the name for the list?</div></div>
-                  <div className="flex justify-start"><div className="max-w-[220px] rounded-2xl rounded-bl-sm bg-secondary px-4 py-2.5 text-sm">Marcus Johnson</div></div>
-                  <div className="flex justify-end"><div className="bg-gradient-velvet max-w-[220px] rounded-2xl rounded-br-sm px-4 py-2.5 text-sm text-white">You&apos;re on the list! Marcus Johnson +5 at Omnia Saturday. Guest list is open 10:30PM - 12:30AM. See you there!</div></div>
-                </div>
-              </div>
-            </div>
+            <SMSDemo />
           </div>
         </div>
       </section>
