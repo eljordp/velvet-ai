@@ -234,10 +234,19 @@ export default function Home() {
 
       {/* Hero */}
       <section className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 pt-20 sm:px-6">
-        {/* Background effects */}
+        {/* Animated background effects */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute left-1/2 top-1/4 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-velvet/10 blur-[120px]" />
-          <div className="absolute right-1/4 top-1/2 h-[400px] w-[400px] rounded-full bg-gold/5 blur-[100px]" />
+          {/* Main velvet red glow - pulses */}
+          <div className="hero-bg-pulse absolute left-1/2 top-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-velvet blur-[150px] sm:h-[600px] sm:w-[600px]" />
+          {/* Drifting warm accent */}
+          <div className="hero-bg-drift absolute right-1/4 top-1/2 h-[350px] w-[350px] rounded-full bg-gold blur-[130px] sm:h-[400px] sm:w-[400px]" />
+          {/* Secondary red drift */}
+          <div className="hero-bg-drift-2 absolute left-1/4 bottom-1/4 h-[300px] w-[300px] rounded-full bg-velvet-dark blur-[100px]" />
+          {/* Club light sweep */}
+          <div className="hero-sweep absolute top-0 left-0 h-full w-1/3 bg-gradient-to-r from-transparent via-velvet-light/5 to-transparent" />
+          {/* Club color flashes */}
+          <div className="hero-club-glow absolute inset-0 bg-gradient-to-br from-velvet/20 via-transparent to-gold/10" />
+          <div className="hero-club-glow-2 absolute inset-0 bg-gradient-to-tl from-velvet-dark/15 via-transparent to-velvet-light/10" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-5xl text-center">
@@ -248,7 +257,7 @@ export default function Home() {
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight sm:text-5xl md:text-7xl">
             Your Guest List
             <br />
-            <span className="text-gradient">Runs Itself.</span>
+            <span className="text-gradient-animated">Runs Itself.</span>
           </h1>
           <p className="mx-auto mb-10 max-w-2xl text-lg text-muted-foreground md:text-xl">
             AI SMS bot that handles your guest list 24/7. Texts back instantly,
